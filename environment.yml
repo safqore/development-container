@@ -1,0 +1,6 @@
+name: python-dev-env
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+    - python-dotenv
