@@ -17,7 +17,7 @@ This guide will walk you through setting up Visual Studio Code (VSCode) to work 
 
 Clone the repository to your local machine:
 ```sh
-git clone https://github.com/safqore/python-dev-environment.git
+git clone https://github.com/abbadminhas/python-dev-environment.git
 cd python-dev-environment
 ```
 
@@ -46,3 +46,5 @@ docker ps -a
 docker-compose logs
 docker-compose down
 ```
+
+if wanting to use JupyterLab instead of VSCode, simply nativate to: http://localhost:8888/
