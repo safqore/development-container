@@ -1,0 +1,62 @@
+- name: Setup development environment
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - software-properties-common
+          - apt-transport-https
+          - wget
+          - gpg
+        state: present
+
+    - name: Add Microsoft GPG key
+      apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Add VSCode repository
+      apt_repository:
+        repo: deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main
+        state: present
+        filename: vscode
+
+    - name: Install VSCode
+      apt:
+        name: code
+        state: present
+
+    - name: Add GitHub CLI GPG key
+      apt_key:
+        url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+        state: present
+
+    - name: Add GitHub CLI repository
+      apt_repository:
+        repo: deb [arch=amd64] https://cli.github.com/packages stable main
+        state: present
+        filename: github-cli
+
+    - name: Install GitHub CLI
+      apt:
+        name: gh
+        state: present
+
+    - name: Download Miniconda installer
+      get_url:
+        url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        dest: /tmp/miniconda.sh
+        mode: '0755'
+
+    - name: Remove existing Miniconda installation if it exists
+      file:
+        path: /opt/miniconda
+        state: absent
+        force: yes
+
+    - name: Install Miniconda
+      command: /tmp/miniconda.sh -b -p /opt/miniconda
+
+    - name: Initialize Conda
+      shell: /opt/miniconda/bin/conda init

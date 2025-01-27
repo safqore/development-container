@@ -1,50 +1,72 @@
-# Python Development Environment
+# Development Container
 
-This GIT repository is setup for python development environment. It will continually evolve. To setup environment for your project, replace "python-dev" in all files with your environment name e.g. "openai-experiments"
+This development container aims to set up a development environment quickly and reliably for developers.
 
-## Development Setup - VSCode with Anaconda in Docker
+### Steps
 
-This guide will walk you through setting up Visual Studio Code (VSCode) to work with an Anaconda virtual environment running inside a Docker container.
+1. Open Command Prompt as Administrator:
+    - Right-click the Start Menu and select Command Prompt (Admin).
 
-## Prerequisites
+2. If Ubuntu is already installed, start it using:
+    - `wsl -d Ubuntu`
 
-1. **Docker**: Ensure Docker is installed and running on your system.
-2. **VSCode**: Install Visual Studio Code.
+3. If WSL is not installed, run the WSL Installation Command:
+    - `wsl --install`
 
-## Step-by-Step Guide
+4. Set default version to 2:
+    - `wsl --set-default-version 2`
 
-### 1. Clone the Repository
+5. Configure WSL memory and processors:
+    - Open a text editor and create a new file named `.wslconfig` in your Windows user profile directory (e.g., `C:\Users\<YourUsername>\.wslconfig`).
+    - Add the following configuration:
+      ```
+      [wsl2]
+      # Enables cgroup v2 and unified cgroup hierarchy
+      kernelCommandLine=cgroup_no_v1=all systemd.unified_cgroup_hierarchy=1 
 
-Clone the repository to your local machine:
-```sh
-git clone https://github.com/abbadminhas/python-dev-environment.git
-cd python-dev-environment
-```
+      # Limits VM memory in WSL 2 to 4 GB
+      memory=4GB 
+      
+      # Specifies the number of virtual processors
+      processors=2
+      ```
+    - Save the file and restart WSL by running the following command in PowerShell or Command Prompt:
+      ```sh
+      wsl --shutdown
+      ```
 
-### 2. Start the Docker Container
-From Git Bash or the terminal, navigate to the root directory of the cloned repository and run the following command to start the Docker container using Docker Compose:
+6. If WSL is already installed, check for updates:
+    - `wsl --update`
 
-```sh
-docker-compose up --build
-```
+7. Install Ubuntu using WSL:
+    - `wsl --install -d Ubuntu`
 
-### 3. Open in VSCode
-Ensure you have Visual Studio Code installed. Open python-dev-environment folder in Visual Studio Code. The .devcontainer folder has been added to the project. Once the container is running, you will see an option in VSCode to "Reopen in Container." Click this option to attach VSCode to the running container.
+8. Open Ubuntu terminal and set up your username and password:
+    - Follow the prompts to create a new user account and set a password. This user will have sudo privileges.
 
-### 4. Start Developing
-Once everything is set up, you can start developing in Python. Open any Python script (e.g., environment-check.py) and run it to ensure everything is configured correctly:
+9. Update package lists:
+    - `sudo apt update`
 
-```sh
-python environment-check.py
-```
+10. Upgrade packages:
+    - `sudo apt upgrade -y`
+    - `sudo apt full-upgrade -y`
+    - `sudo apt autoremove -y`
 
-### Additional Information
-If you need to see all running services or stop the Docker container, you can use the following commands:
+11. Install Ansible:
+    - `sudo apt install ansible -y`
 
-```sh
-docker ps -a 
-docker-compose logs
-docker-compose down
-```
+12. Set up Git:
+    - `git config --global user.name "Your Name"`
+    - `git config --global user.email "your.email@example.com"`
+    - `git config --global init.defaultBranch main`
+    - `gh auth login`
+    - `gh auth setup-git`
 
-if wanting to use JupyterLab instead of VSCode, simply nativate to: http://localhost:8888/
+13. Clone the repository:
+    - `git clone https://github.com/safqore/development-container.git`
+
+14. Navigate to the cloned repository:
+    - `cd development-container`
+
+15. Run the Ansible playbook to set up the development environment:
+    - `sudo ansible-playbook playbook.yaml`
