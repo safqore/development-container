@@ -2,6 +2,10 @@
   hosts: localhost
   become: yes
   tasks:
+    - name: Update apt package list
+      apt:
+        update_cache: yes
+
     - name: Install dependencies
       apt:
         name:
@@ -25,7 +29,7 @@
     - name: Install VSCode
       apt:
         name: code
-        state: present
+        state: latest
 
     - name: Add GitHub CLI GPG key
       apt_key:
@@ -60,3 +64,30 @@
 
     - name: Initialize Conda
       shell: /opt/miniconda/bin/conda init
+
+    - name: Install PostgreSQL
+      apt:
+        name: postgresql
+        state: present
+
+    - name: Start PostgreSQL service
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: Add DBeaver GPG key
+      apt_key:
+        url: https://dbeaver.io/debs/dbeaver.gpg.key
+        state: present
+
+    - name: Add DBeaver repository
+      apt_repository:
+        repo: deb https://dbeaver.io/debs/dbeaver-ce /
+        state: present
+        filename: dbeaver
+
+    - name: Install DBeaver
+      apt:
+        name: dbeaver-ce
+        state: present
