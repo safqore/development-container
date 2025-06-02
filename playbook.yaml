@@ -92,6 +92,45 @@
         name: dbeaver-ce
         state: present
 
+    - name: Install Node.js
+      apt:
+        name: nodejs
+        state: present
+
+    - name: Install npm
+      apt:
+        name: npm
+        state: present
+
+    - name: Install Node-RED globally
+      npm:
+        name: node-red
+        global: yes
+
+    - name: Enable Node-RED to start on boot (systemd)
+      shell: |
+        sudo npm install -g --unsafe-perm node-red
+        sudo bash -c 'cat <<EOF > /etc/systemd/system/node-red.service
+        [Unit]
+        Description=Node-RED
+        After=network.target
+
+        [Service]
+        ExecStart=/usr/bin/env node-red-pi --max-old-space-size=256
+        Restart=on-failure
+        User={{ ansible_user_id }}
+        Group={{ ansible_user_gid }}
+        Environment="NODE_OPTIONS=--max_old_space_size=256"
+
+        [Install]
+        WantedBy=multi-user.target
+        EOF'
+        sudo systemctl daemon-reload
+        sudo systemctl enable node-red
+        sudo systemctl start node-red
+      args:
+        executable: /bin/bash
+
     - name: Upgrade all packages to the latest version
       apt:
         upgrade: dist
