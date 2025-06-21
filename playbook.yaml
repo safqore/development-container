@@ -2,18 +2,30 @@
   hosts: localhost
   become: yes
   tasks:
-    - name: Update apt package list
-      apt:
-        update_cache: yes
+    # --- Microsoft Repository Cleanup and Setup (Ubuntu only) ---
+    - name: Remove all Microsoft repo files from sources.list.d
+      shell: |
+        grep -l 'packages.microsoft.com' /etc/apt/sources.list.d/* 2>/dev/null || true
+      register: ms_repo_files_shell
+      changed_when: false
 
-    - name: Install dependencies
-      apt:
-        name:
-          - software-properties-common
-          - apt-transport-https
-          - wget
-          - gpg
-        state: present
+    - name: Delete conflicting Microsoft repo files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop: "{{ ms_repo_files_shell.stdout_lines }}"
+      when: ms_repo_files_shell.stdout != ""
+
+    - name: Remove Microsoft repo from /etc/apt/sources.list if present
+      lineinfile:
+        path: /etc/apt/sources.list
+        regexp: '^.*packages.microsoft.com.*$'
+        state: absent
+
+    - name: Remove old Microsoft keyring if present
+      file:
+        path: /usr/share/keyrings/microsoft.gpg
+        state: absent
 
     - name: Add Microsoft GPG key
       apt_key:
@@ -23,8 +35,8 @@
     - name: Add VSCode repository
       apt_repository:
         repo: deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main
-        state: present
         filename: vscode
+        state: present
 
     - name: Install VSCode
       apt:
