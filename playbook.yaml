@@ -59,6 +59,47 @@
         name: gh
         state: present
 
+    # --- Manual Cursor IDE Installation Notes ---
+    # Note: Cursor IDE was installed manually rather than through the playbook
+    # due to repository connection issues. Below are the steps followed:
+    # 
+    # 1. Download Cursor AppImage from official website (version 1.1.6)
+    #    The file was saved as ~/Downloads/Cursor-1.1.6-x86_64.AppImage
+    # 
+    # 2. Create a dedicated directory for Cursor:
+    #    mkdir -p ~/cursor
+    # 
+    # 3. Move the AppImage to this directory:
+    #    mv ~/Downloads/Cursor-1.1.6-x86_64.AppImage ~/cursor/
+    # 
+    # 4. Make the AppImage executable:
+    #    chmod +x ~/cursor/Cursor-1.1.6-x86_64.AppImage
+    # 
+    # 5. Create a symbolic link for easy access:
+    #    mkdir -p ~/.local/bin
+    #    ln -s ~/cursor/Cursor-1.1.6-x86_64.AppImage ~/.local/bin/cursor
+    # 
+    # 6. Add ~/.local/bin to PATH (if not already there):
+    #    export PATH="$HOME/.local/bin:$PATH" >> ~/.bashrc
+    #    source ~/.bashrc
+    # 
+    # 7. Create a desktop entry:
+    #    mkdir -p ~/.local/share/applications
+    #    cat > ~/.local/share/applications/cursor.desktop << EOL
+    #    [Desktop Entry]
+    #    Name=Cursor IDE
+    #    Comment=AI-first code editor
+    #    Exec=${HOME}/cursor/Cursor-1.1.6-x86_64.AppImage
+    #    Icon=${HOME}/cursor/cursor-icon.png
+    #    Terminal=false
+    #    Type=Application
+    #    Categories=Development;IDE;
+    #    StartupWMClass=Cursor
+    #    EOL
+    # 
+    # 8. Download an icon for Cursor (optional):
+    #    curl -L "https://raw.githubusercontent.com/getcursor/cursor/main/resources/app/resources/icons/icon.png" -o ~/cursor/cursor-icon.png
+
     - name: Download Miniconda installer
       get_url:
         url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
