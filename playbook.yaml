@@ -99,6 +99,17 @@
     # 
     # 8. Download an icon for Cursor (optional):
     #    curl -L "https://raw.githubusercontent.com/getcursor/cursor/main/resources/app/resources/icons/icon.png" -o ~/cursor/cursor-icon.png
+    #
+    # 9. If you see an error about "libfuse.so.2" or "AppImages require FUSE to run":
+    #    Install FUSE with:
+    #      sudo apt update
+    #      sudo apt install libfuse2
+    #    Then try running Cursor again.
+    #
+    # 10. To run Cursor:
+    #     - From terminal: cursor
+    #     - Or: ~/cursor/Cursor-1.1.6-x86_64.AppImage
+    #     - Or from your desktop menu (after creating the desktop entry)
 
     - name: Download Miniconda installer
       get_url:
