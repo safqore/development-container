@@ -97,7 +97,12 @@
       command: /tmp/miniconda.sh -b -p /opt/miniconda
 
     - name: Initialize Conda
-      shell: /opt/miniconda/bin/conda init
+      debug:
+        msg: |
+          Miniconda is installed at /opt/miniconda.
+          To activate Conda in your shell, run:
+            /opt/miniconda/bin/conda init
+          Then restart your terminal.
 
     - name: Install PostgreSQL
       apt:
