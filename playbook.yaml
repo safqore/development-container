@@ -2,6 +2,18 @@
   hosts: localhost
   become: yes
   tasks:
+    # --- System Architecture Detection ---
+    - name: Gather system facts
+      setup:
+
+    - name: Set architecture variables
+      set_fact:
+        is_arm: "{{ ansible_architecture == 'aarch64' }}"
+        arch_suffix: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+
+    - name: Display detected architecture
+      debug:
+        msg: "Detected architecture: {{ ansible_architecture }} (ARM64: {{ is_arm }})"
     # --- Microsoft Repository Cleanup and Setup (Ubuntu only) ---
     - name: Remove all Microsoft repo files from sources.list.d
       shell: |
@@ -32,16 +44,26 @@
         url: https://packages.microsoft.com/keys/microsoft.asc
         state: present
 
-    - name: Add VSCode repository
+
+    - name: VSCode installation instructions for ARM64
+      debug:
+        msg: |
+          VSCode is not installed automatically for ARM64 (Apple Silicon/Mac) systems.
+          Please download and install VSCode manually from https://code.visualstudio.com/Download
+      when: is_arm
+
+    - name: Add VSCode repository (x86_64 only)
       apt_repository:
-        repo: deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main
+        repo: "deb [arch={{ arch_suffix }} signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
         filename: vscode
         state: present
+      when: not is_arm
 
-    - name: Install VSCode
+    - name: Install VSCode (x86_64 only)
       apt:
         name: code
         state: latest
+      when: not is_arm
 
     - name: Add GitHub CLI GPG key
       apt_key:
@@ -50,7 +72,7 @@
 
     - name: Add GitHub CLI repository
       apt_repository:
-        repo: deb [arch=amd64] https://cli.github.com/packages stable main
+        repo: "deb [arch={{ arch_suffix }}] https://cli.github.com/packages stable main"
         state: present
         filename: github-cli
 
@@ -59,61 +81,9 @@
         name: gh
         state: present
 
-    # --- Manual Cursor IDE Installation Notes ---
-    # Note: Cursor IDE was installed manually rather than through the playbook
-    # due to repository connection issues. Below are the steps followed:
-    # 
-    # 1. Download Cursor AppImage from official website (version 1.1.6)
-    #    The file was saved as ~/Downloads/Cursor-1.1.6-x86_64.AppImage
-    # 
-    # 2. Create a dedicated directory for Cursor:
-    #    mkdir -p ~/cursor
-    # 
-    # 3. Move the AppImage to this directory:
-    #    mv ~/Downloads/Cursor-1.1.6-x86_64.AppImage ~/cursor/
-    # 
-    # 4. Make the AppImage executable:
-    #    chmod +x ~/cursor/Cursor-1.1.6-x86_64.AppImage
-    # 
-    # 5. Create a symbolic link for easy access:
-    #    mkdir -p ~/.local/bin
-    #    ln -s ~/cursor/Cursor-1.1.6-x86_64.AppImage ~/.local/bin/cursor
-    # 
-    # 6. Add ~/.local/bin to PATH (if not already there):
-    #    export PATH="$HOME/.local/bin:$PATH" >> ~/.bashrc
-    #    source ~/.bashrc
-    # 
-    # 7. Create a desktop entry:
-    #    mkdir -p ~/.local/share/applications
-    #    cat > ~/.local/share/applications/cursor.desktop << EOL
-    #    [Desktop Entry]
-    #    Name=Cursor IDE
-    #    Comment=AI-first code editor
-    #    Exec=${HOME}/cursor/Cursor-1.1.6-x86_64.AppImage
-    #    Icon=${HOME}/cursor/cursor-icon.png
-    #    Terminal=false
-    #    Type=Application
-    #    Categories=Development;IDE;
-    #    StartupWMClass=Cursor
-    #    EOL
-    # 
-    # 8. Download an icon for Cursor (optional):
-    #    curl -L "https://raw.githubusercontent.com/getcursor/cursor/main/resources/app/resources/icons/icon.png" -o ~/cursor/cursor-icon.png
-    #
-    # 9. If you see an error about "libfuse.so.2" or "AppImages require FUSE to run":
-    #    Install FUSE with:
-    #      sudo apt update
-    #      sudo apt install libfuse2
-    #    Then try running Cursor again.
-    #
-    # 10. To run Cursor:
-    #     - From terminal: cursor
-    #     - Or: ~/cursor/Cursor-1.1.6-x86_64.AppImage
-    #     - Or from your desktop menu (after creating the desktop entry)
-
     - name: Download Miniconda installer
       get_url:
-        url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        url: "{{ 'https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh' if is_arm else 'https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh' }}"
         dest: /tmp/miniconda.sh
         mode: '0755'
 
@@ -145,16 +115,26 @@
         url: https://dbeaver.io/debs/dbeaver.gpg.key
         state: present
 
-    - name: Add DBeaver repository
+
+    - name: DBeaver installation instructions for ARM64
+      debug:
+        msg: |
+          DBeaver is not installed automatically for ARM64 (Apple Silicon/Mac) systems.
+          Please download and install DBeaver manually from https://dbeaver.io/download/
+      when: is_arm
+
+    - name: Add DBeaver repository (x86_64 only)
       apt_repository:
         repo: deb https://dbeaver.io/debs/dbeaver-ce /
         state: present
         filename: dbeaver
+      when: not is_arm
 
-    - name: Install DBeaver
+    - name: Install DBeaver (x86_64 only)
       apt:
         name: dbeaver-ce
         state: present
+      when: not is_arm
 
     - name: Install Node.js
       apt:
